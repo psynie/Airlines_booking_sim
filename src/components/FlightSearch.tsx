@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ interface FlightSearchProps {
 }
 
 const FlightSearch = ({ onSearch }: FlightSearchProps) => {
+  const navigate = useNavigate();
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
@@ -20,8 +22,14 @@ const FlightSearch = ({ onSearch }: FlightSearchProps) => {
       toast.error("Please enter both source and destination");
       return;
     }
+    if (!date) {
+      toast.error("Please select a departure date");
+      return;
+    }
     onSearch(source, destination);
-    toast.success("Searching for flights...");
+    navigate("/flight-results", {
+      state: { source, destination, date, passengers }
+    });
   };
 
   return (
@@ -38,9 +46,9 @@ const FlightSearch = ({ onSearch }: FlightSearchProps) => {
             From
           </label>
           <Input
-            placeholder="e.g., JFK, LAX, LHR, DXB"
+            placeholder="e.g., DEL, BOM, JFK, DXB, LHR, SIN"
             value={source}
-            onChange={(e) => setSource(e.target.value)}
+            onChange={(e) => setSource(e.target.value.toUpperCase())}
             className="border-border bg-background"
           />
         </div>
@@ -52,9 +60,9 @@ const FlightSearch = ({ onSearch }: FlightSearchProps) => {
             To
           </label>
           <Input
-            placeholder="e.g., SIN, CDG, NRT, SYD"
+            placeholder="e.g., GOI, BLR, CDG, NRT, SYD"
             value={destination}
-            onChange={(e) => setDestination(e.target.value)}
+            onChange={(e) => setDestination(e.target.value.toUpperCase())}
             className="border-border bg-background"
           />
         </div>
