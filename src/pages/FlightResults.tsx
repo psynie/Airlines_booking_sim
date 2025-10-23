@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +19,17 @@ interface Flight {
   stops: number;
 }
 
+import Globe from "@/components/Globe";
+
 const FlightResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { source, destination, date, passengers } = location.state || {};
+
+  // Show an intermediate globe arc preview before proceeding to booking
+  const [showArcPreview, setShowArcPreview] = useState(false);
+  const [pendingFlight, setPendingFlight] = useState<Flight | null>(null);
+  const [proceedEnabled, setProceedEnabled] = useState(false);
 
   const sourceAirport = getAirportByCode(source || "");
   const destAirport = getAirportByCode(destination || "");
@@ -56,9 +64,22 @@ const FlightResults = () => {
   const flights = generateFlights();
 
   const handleBookFlight = (flight: Flight) => {
+    // Hold the booking and show globe arc preview first
+    setPendingFlight(flight);
+    setProceedEnabled(false);
+    setShowArcPreview(true);
+
+    // Enable proceed after globe arc animation completes (matching Globe's arcDashAnimateTime)
+    // Slightly longer to ensure user sees the arc
+    setTimeout(() => setProceedEnabled(true), 2200);
+  };
+
+  const finishBooking = () => {
+    if (!pendingFlight) return;
+    setShowArcPreview(false);
     navigate("/booking-confirmation", {
       state: {
-        flight,
+        flight: pendingFlight,
         source,
         destination,
         date,
@@ -163,8 +184,8 @@ const FlightResults = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">per person</p>
                   </div>
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     onClick={() => handleBookFlight(flight)}
                     className="w-full"
                   >
@@ -176,6 +197,33 @@ const FlightResults = () => {
           ))}
         </div>
       </div>
+
+      {/* Arc preview modal */}
+      {showArcPreview && source && destination && pendingFlight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
+          <div className="max-w-4xl w-full bg-background rounded-lg shadow-xl overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Flight Route Preview</h3>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => setShowArcPreview(false)}>Cancel</Button>
+                <Button onClick={finishBooking} disabled={!proceedEnabled}>
+                  {proceedEnabled ? "Proceed to Checkout" : "Preparing..."}
+                </Button>
+              </div>
+            </div>
+
+           <div className="flex items-center justify-center bg-transparent overflow-visible py-4">
+  <div className="w-full max-w-4xl h-[600px] mx-auto flex items-center justify-center overflow-visible">
+    <Globe source={source} destination={destination} />
+  </div>
+</div>
+            <div className="p-4 text-sm text-muted-foreground">
+              <p className="mb-2">Previewing the flight path from <strong>{source}</strong> to <strong>{destination}</strong>.</p>
+              <p>If everything looks good, click <strong>Proceed to Checkout</strong> to continue to payment and passenger details.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
