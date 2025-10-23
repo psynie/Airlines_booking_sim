@@ -37,6 +37,12 @@ const Index = () => {
             <a href="#globe-section" className="hover:text-primary transition-colors">
               Routes
             </a>
+            <a href="/offers" className="hover:text-primary transition-colors">
+              Offers
+            </a>
+            <a href="/faq" className="hover:text-primary transition-colors">
+              FAQs
+            </a>
           </div>
         </div>
       </nav>

@@ -38,7 +38,7 @@ const FlightSearch = ({ onSearch }: FlightSearchProps) => {
             From
           </label>
           <Input
-            placeholder="New York (JFK)"
+            placeholder="e.g., JFK, LAX, LHR, DXB"
             value={source}
             onChange={(e) => setSource(e.target.value)}
             className="border-border bg-background"
@@ -52,7 +52,7 @@ const FlightSearch = ({ onSearch }: FlightSearchProps) => {
             To
           </label>
           <Input
-            placeholder="London (LHR)"
+            placeholder="e.g., SIN, CDG, NRT, SYD"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             className="border-border bg-background"
